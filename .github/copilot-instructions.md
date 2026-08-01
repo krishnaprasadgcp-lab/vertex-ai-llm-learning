@@ -1,0 +1,10 @@
+- [ ] Verify project structure created
+- [ ] Install dependencies: pip install -r requirements.txt
+- [ ] Authenticate GCP: gcloud auth application-default login
+- [ ] Set GCP project: gcloud config set project gen-lang-client-0791883042
+- [ ] Copy .env file: cp .env.example .env
+- [ ] Run Phase 1: python src/scripts/01_setup_exploration.py
+- [ ] Run Phase 2: python src/scripts/02_prepare_data.py
+- [ ] Review TODO.md for learning phases
+- [ ] Read Vertex AI documentation
+- [ ] Create GCS bucket for training data
