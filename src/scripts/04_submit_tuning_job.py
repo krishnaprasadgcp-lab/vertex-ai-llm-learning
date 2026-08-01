@@ -28,17 +28,17 @@ def main():
     trainer = VertexAITrainer()
 
     # Uncomment to submit the actual job:
-    # tuning_job = trainer.submit_tuning_job(
-    #     training_data_uri=settings.GCS_TRAINING_DATA_URI,
-    #     validation_data_uri=settings.GCS_VALIDATION_DATA_URI,
-    #     tuned_model_name=settings.MODEL_DISPLAY_NAME,
-    #     epochs=settings.EPOCHS,
-    #     learning_rate_multiplier=settings.LEARNING_RATE_MULTIPLIER,
-    #     adapter_size=settings.ADAPTER_SIZE,
-    # )
-    # print(f"\nJob submitted: {tuning_job.resource_name}")
-    # print("Monitor at: https://console.cloud.google.com/vertex-ai/training/training-pipelines"
-    #       f"?project={settings.GCP_PROJECT_ID}")
+    tuning_job = trainer.submit_tuning_job(
+         training_data_uri=settings.GCS_TRAINING_DATA_URI,
+         validation_data_uri=settings.GCS_VALIDATION_DATA_URI,
+         tuned_model_name=settings.MODEL_DISPLAY_NAME,
+         epochs=settings.EPOCHS,
+        learning_rate_multiplier=settings.LEARNING_RATE_MULTIPLIER,
+        adapter_size=settings.ADAPTER_SIZE,
+    )
+    print(f"\nJob submitted: {tuning_job.resource_name}")
+    print("Monitor at: https://console.cloud.google.com/vertex-ai/training/training-pipelines"
+        f"?project={settings.GCP_PROJECT_ID}")
 
     print("\n[DRY RUN] Job NOT submitted.")
     print("To submit, uncomment the code block in this script.")

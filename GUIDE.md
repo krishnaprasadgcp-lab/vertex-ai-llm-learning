@@ -644,4 +644,91 @@ gcloud ai endpoints delete ENDPOINT_ID --region us-west1
 
 ---
 
-*This project uses: Python 3.11 · `google-cloud-aiplatform>=1.50` · `vertexai.tuning.sft` · Gemini 2.0 Flash*
+## 14. Understanding Tokens in Training
+
+A **token** is the basic unit the model reads and generates. Not a word — closer to a word fragment.
+
+```
+"Hello, how are you today?"
+ Hello  ,  how  are  you  today  ?
+   1    2   3    4    5     6    7  → 7 tokens
+```
+
+```
+"unbelievable"  →  "un"  "believ"  "able"  → 3 tokens
+```
+
+A rough rule: **1 token ≈ 0.75 words** in English.
+
+### Where tokens appear in your training pipeline
+
+**1. In your JSONL training data**
+
+Every example gets tokenised before training:
+
+```json
+{
+  "contents": [
+    {"role": "user",  "parts": [{"text": "Give three tips for staying healthy."}]},
+    {"role": "model", "parts": [{"text": "1. Eat balanced meals\n2. Exercise\n3. Sleep"}]}
+  ]
+}
+```
+
+```
+user turn:  "Give three tips for staying healthy."  →  ~8 tokens
+model turn: "1. Eat balanced meals..."              →  ~12 tokens
+total for this example                              →  ~20 tokens
+```
+
+**2. In the training cost calculation**
+
+You are billed per **token processed**, not per example:
+
+```
+160 training examples × ~200 tokens avg = 32,000 tokens
+× 3 epochs                               = 96,000 tokens trained
+```
+
+For `gemini-2.5-flash` SFT that is a very small job — likely under $1.
+
+**3. In the model limits**
+
+| Limit | Gemini 2.5 Flash | What it means |
+|---|---|---|
+| Max input tokens | ~1,000,000 | Max length of a single prompt |
+| Max output tokens | ~8,192 | Max length of a single response |
+| Max tokens per training example | ~32,768 | If your example exceeds this it gets truncated |
+
+Your Alpaca examples average ~200 tokens — well within limits.
+
+**4. During the forward pass (what actually happens)**
+
+```
+Your example (tokenised):
+[user: "Give tips...", model: "1. Eat..."]
+         ↓
+Token IDs: [1374, 2093, 9321, ...]
+         ↓
+Model predicts next token at each position
+         ↓
+Loss = how wrong was each predicted token vs your actual model turn
+         ↓
+Weights adjusted to make those token predictions more accurate
+```
+
+The model only computes loss on the **model turn tokens** — it is not penalised for
+the user turn, only trained to produce the correct response.
+
+### Why this matters for your dataset quality
+
+- **Too short responses** (< 10 tokens): model learns almost nothing per example
+- **Too long examples** (> 32K tokens): gets truncated, losing the end of your response
+- **Repetitive tokens** across examples: model over-indexes on those patterns
+
+Your 200 Alpaca examples are well-sized — varied instructions with substantive
+responses, typically 100–400 tokens each. That is a good learning signal.
+
+---
+
+*This project uses: Python 3.11 · `google-cloud-aiplatform>=1.50` · `vertexai.tuning.sft` · Gemini 2.5 Flash*

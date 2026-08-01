@@ -9,10 +9,10 @@ class Settings(BaseSettings):
 
     # GCP Configuration
     GCP_PROJECT_ID: str = "gen-lang-client-0791883042"
-    GCP_REGION: str = "us-west1"
+    GCP_REGION: str = "us-central1"  # SFT only supported in us-central1
 
     # Vertex AI Configuration
-    VERTEX_AI_LOCATION: str = "us-west1"
+    VERTEX_AI_LOCATION: str = "us-central1"
     MODEL_DISPLAY_NAME: str = "my-gemini-finetuned-model"
 
     # Dataset Configuration
@@ -24,12 +24,12 @@ class Settings(BaseSettings):
     EPOCHS: int = 3
     ADAPTER_SIZE: int = 4  # LoRA adapter size: 1, 2, 4, 8, 16
 
-    # Model Configuration — use versioned model IDs for tuning
-    # Options: gemini-1.5-pro-002, gemini-1.5-flash-002, gemini-2.0-flash-001
-    BASE_MODEL: str = "gemini-2.0-flash-001"
+    # Model Configuration — fully-qualified resource name required for SFT
+    # Use publishers/google/models/<model> format
+    BASE_MODEL: str = "publishers/google/models/gemini-2.5-flash"
 
-    # GCS Configuration
-    GCS_BUCKET: str = "gen-lang-client-0791883042-vertex-ai-training"
+    # GCS Configuration — bucket must be in same region as tuning job
+    GCS_BUCKET: str = "gen-lang-client-0791883042-sft-central1"
 
     @computed_field
     @property
